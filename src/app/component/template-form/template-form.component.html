@@ -87,7 +87,7 @@
                 <label for="bairro" class="control-label">Bairro</label>
                 <input type="text" class="form-control" id="bairro"
                         name="bairro" ngModel required #bairro="ngModel">
-                <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true" *ngIf="!bairro.valid && bairro.touched"></span>
+                        
                 <app-campo-control-erro 
                     [mostrarErro]="verificaValidTouched( bairro )" 
                     msgErro="Bairro é obrigatório">
@@ -98,6 +98,7 @@
                 <label for="cidade" class="control-label">Cidade</label>
                 <input type="text" class="form-control" id="cidade"
                         name="cidade" ngModel required #cidade="ngModel">
+
                 <app-campo-control-erro 
                     [mostrarErro]="verificaValidTouched( cidade )" 
                     msgErro="Cidade é obrigatório">

@@ -8,6 +8,7 @@ import 'rxjs/add/operator/map';
   styleUrls: ['./template-form.component.css']
 })
 export class TemplateFormComponent implements OnInit {
+
   usuario: any = {
     nome: null,
     email: null
@@ -106,5 +107,11 @@ export class TemplateFormComponent implements OnInit {
     console.log( 'submit', form );
 
     // console.log( 'usuario', this.usuario );
+
+    this.http.post( 'https://httpbin.org/post', JSON.stringify( form.value ) )
+      .map( res => res )
+      .subscribe( res => {
+        console.log( 'dados', res );
+      } );
   }
 }
