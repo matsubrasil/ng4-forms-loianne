@@ -35,7 +35,7 @@ export class TemplateFormComponent implements OnInit {
 
   }
 
-  consultaCEP( cep , form ) {
+  consultaCEP( cep , formulario ) {
     console.log( 'cep', cep );
     cep = cep.replace(/\D/g, '');
     console.log( 'cep', cep );
@@ -43,18 +43,18 @@ export class TemplateFormComponent implements OnInit {
       const validacep = /^[0-9]{8}$/;
       if ( validacep.test( cep ) ) {
 
-        this.resetaFormulario( form );
+        this.resetaFormulario( formulario );
 
         this.http.get( `//viacep.com.br/ws/${cep}/json/` )
           .map( dados => dados.json() )
           .subscribe( (dados) => {
             // console.log( 'endereco', dados );
-            this.populaDadosFormulario( dados, form );
+            this.populaDadosFormulario( dados, formulario );
           });
       } else {
         // cep é inválido.
-        this.resetaFormulario( form );
         alert('Formato de CEP inválido.');
+        formulario.form.reset();
       }
     }
   }
@@ -103,15 +103,16 @@ export class TemplateFormComponent implements OnInit {
         }
     });
   }
-  onSubmit(form) {
-    console.log( 'submit', form );
+  onSubmit(formulario) {
+    console.log( 'submit', formulario );
 
     // console.log( 'usuario', this.usuario );
 
-    this.http.post( 'https://httpbin.org/post', JSON.stringify( form.value ) )
+    this.http.post( 'https://httpbin.org/post', JSON.stringify( formulario.value ) )
       .map( res => res )
       .subscribe( res => {
         console.log( 'dados', res );
+        formulario.form.reset();
       } );
   }
 }

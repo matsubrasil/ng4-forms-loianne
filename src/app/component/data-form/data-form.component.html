@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1">    
-        <form class="form-horizontal" [formGroup]="formulario">
+        <form class="form-horizontal" [formGroup]="formulario" (ngSubmit)="onSubmit()">
           <!-- nome -->
           <div class="form-group">
             <div class="col-sm-12">
@@ -24,6 +24,7 @@
           </div> <!-- email -->
           
           <button type="submit" class="btn btn-primary">Submit</button>
+          <button class="btn btn-default" (click)="resetar()">Cancelar</button>
 
           <app-form-debug [form]="formulario"></app-form-debug> 
         </form>
