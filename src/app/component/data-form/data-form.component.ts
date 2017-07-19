@@ -26,12 +26,19 @@ export class DataFormComponent implements OnInit {
 
     this.formulario = this.formBuilder.group({
       nome: [ null, [ Validators.required, Validators.minLength( 3 ), Validators.maxLength( 20 ) ] ],
-      email:  [ null, [ Validators.required, Validators.email ] ]
+      email:  [ null, [ Validators.required, Validators.email ] ],
+      cep: [ null, Validators.required ],
+      numero: [ null, Validators.required ],
+      complemento: [ null ],
+      rua: [ null, Validators.required ],
+      bairro: [ null, Validators.required ],
+      cidade: [ null, Validators.required ],
+      estado: [ null, Validators.required ],
     });
   }
 
   onSubmit() {
-    console.log( 'form', this.formulario.value );
+    console.log( 'form', this.formulario );
 
     this.http.post( 'https://httpbin.org/post',
                     JSON.stringify( this.formulario.value ) )
@@ -42,7 +49,7 @@ export class DataFormComponent implements OnInit {
 
         // reseta o formulario
         // this.formulario.reset();
-        this.resetar();
+        // this.resetar();
 
       },
       (error: any) => alert( 'erro' ) );
@@ -50,5 +57,27 @@ export class DataFormComponent implements OnInit {
 
   resetar() {
     this.formulario.reset();
+  }
+
+  verificaValidTouched( campo: string): boolean {
+    return !this.formulario.get(campo).valid && this.formulario.get(campo).touched;
+  }
+
+  verificaEmailInvalido(): boolean {
+    const campoEmail = this.formulario.get('email');
+    if ( campoEmail.errors ) {
+      return campoEmail.errors['email'] && campoEmail.touched;
+    }
+  }
+
+  aplicaCssErro( campo: string ) {
+
+    // console.log( 'campo', campo );
+
+    return {
+      'has-error': this.verificaValidTouched( campo ),
+      'has-feedback': this.verificaValidTouched( campo )
+    }
+
   }
 }
