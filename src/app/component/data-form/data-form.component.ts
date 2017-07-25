@@ -25,22 +25,28 @@ export class DataFormComponent implements OnInit {
     // });
 
     this.formulario = this.formBuilder.group({
+
       nome: [ null, [ Validators.required, Validators.minLength( 3 ), Validators.maxLength( 20 ) ] ],
       email:  [ null, [ Validators.required, Validators.email ] ],
-      cep: [ null, Validators.required ],
-      numero: [ null, Validators.required ],
-      complemento: [ null ],
-      rua: [ null, Validators.required ],
-      bairro: [ null, Validators.required ],
-      cidade: [ null, Validators.required ],
-      estado: [ null, Validators.required ],
+
+      endereco: this.formBuilder.group({
+
+        cep: [ null, Validators.required ],
+        numero: [ null, Validators.required ],
+        complemento: [ null ],
+        rua: [ null, Validators.required ],
+        bairro: [ null, Validators.required ],
+        cidade: [ null, Validators.required ],
+        estado: [ null, Validators.required ]
+      })
     });
   }
 
   onSubmit() {
     console.log( 'form', this.formulario );
 
-    this.http.post( 'https://httpbin.org/post',
+    if ( this.formulario.valid ) {
+      this.http.post( 'https://httpbin.org/post',
                     JSON.stringify( this.formulario.value ) )
       .map( res => res.json())
       .subscribe( dados => {
@@ -51,8 +57,26 @@ export class DataFormComponent implements OnInit {
         // this.formulario.reset();
         // this.resetar();
 
-      },
-      (error: any) => alert( 'erro' ) );
+        },
+        (error: any) => alert( 'erro' )
+      );
+    } else {
+      console.log( 'form invalido' );
+      this.verificaValidacoesForm( this.formulario );
+    }
+  }
+
+
+  verificaValidacoesForm( formGroup: FormGroup ) {
+    Object.keys( formGroup.controls ).forEach( campo => {
+        console.log( 'chave: ', campo );
+        const controle = formGroup.get( campo );
+        controle.markAsDirty();
+
+        if ( controle instanceof FormGroup ) {
+          this.verificaValidacoesForm( controle )
+        }
+      });
   }
 
   resetar() {
@@ -60,7 +84,7 @@ export class DataFormComponent implements OnInit {
   }
 
   verificaValidTouched( campo: string): boolean {
-    return !this.formulario.get(campo).valid && this.formulario.get(campo).touched;
+    return !this.formulario.get( campo ).valid && ( this.formulario.get( campo ).touched || this.formulario.get( campo ).dirty );
   }
 
   verificaEmailInvalido(): boolean {
@@ -79,5 +103,62 @@ export class DataFormComponent implements OnInit {
       'has-feedback': this.verificaValidTouched( campo )
     }
 
+  }
+
+  consultaCEP( ) {
+    let cep = this.formulario.get('endereco.cep').value;
+    cep = cep.replace(/\D/g, '');
+    console.log( 'cep', cep );
+    if (cep !== '') {
+      const validacep = /^[0-9]{8}$/;
+      if ( validacep.test( cep ) ) {
+
+        this.resetaFormulario();
+
+        this.http.get( `//viacep.com.br/ws/${cep}/json/` )
+          .map( dados => dados.json() )
+          .subscribe( (dados) => {
+            // console.log( 'endereco', dados );
+            this.populaDadosFormulario( dados );
+          });
+      } else {
+        // cep é inválido.
+        alert('Formato de CEP inválido.');
+        const nometemp = this.formulario.get('nome').value;
+        const emailtemp = this.formulario.get('email').value;
+        this.formulario.reset();
+        this.formulario.get('nome').setValue( nometemp );
+        this.formulario.get('email').setValue( emailtemp );
+      }
+    }
+  }
+
+  populaDadosFormulario( dados ) {
+    console.log('popula dados');
+    this.formulario.patchValue({
+      endereco: {
+        cep: dados.cep,
+        rua: dados.logradouro,
+        complemento: dados.complemento,
+        bairro: dados.bairro,
+        cidade: dados.localidade,
+        estado: dados.uf
+      }
+    });
+    this.formulario.get('nome').setValue('Loiane');
+  }
+
+  resetaFormulario() {
+    this.formulario.patchValue({
+      endereco: {
+          cep: null,
+          rua: null,
+          numero: null,
+          complemento: null,
+          bairro: null,
+          cidade: null,
+          estado: null
+        }
+    });
   }
 }
